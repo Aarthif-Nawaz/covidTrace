@@ -68,5 +68,10 @@
         "id":13,
         "key":"Difficulty In Breathing",
         "checked":false
+    },
+    {
+        "id":14,
+        "key":"None Of the Above Symptoms",
+        "checked":false
     }
 ]
