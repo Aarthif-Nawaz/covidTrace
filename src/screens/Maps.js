@@ -19,12 +19,12 @@ function MapsScreen() {
       <Tab.Screen
         name="Current Location"
         component={CurrentLoc}
-        options={{ tabBarLabel: 'Home' }}
+        options={{ tabBarLabel: 'Current Location' }}
       />
       <Tab.Screen
         name="Visited Location"
         component={VisitedLoc}
-        options={{ tabBarLabel: 'Maps' }}
+        options={{ tabBarLabel: 'Visited Locations' }}
       />
     </Tab.Navigator>
   );
