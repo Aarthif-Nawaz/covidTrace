@@ -6,10 +6,14 @@ import axios from 'axios'
 import { CardThree } from "react-native-card-ui";
 import { CardNine} from '../components/CardNine'
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AnimatedLoader from "react-native-animated-loader";
 export default function GlobalCases({ navigation }) {
     const myicon = <Icon name="coronavirus" size={30} color="#900" />;
     const [cases, setCases] = useState([])
+    const [visible,setVisible] = useState(false)
+
     useEffect(() => {
+        setVisible(true)
         fetch('https://www.hpb.health.gov.lk/api/get-current-statistical', {
             method: 'GET',
             headers: {
@@ -19,12 +23,22 @@ export default function GlobalCases({ navigation }) {
         })
             .then((res) => res.json())
             .then(data => {
+                setVisible(false)
                 setCases(data.data)
                 console.log(data)
             })
     }, [])
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#E3E3E3" }}>
+            <AnimatedLoader
+                visible={visible}
+                overlayColor="rgba(255,255,255,0.75)"
+                source={require("../Assets/loading.json")}
+                animationStyle={styles.lottie}
+                speed={1}
+            >
+                <Text style={styles.headerText}>Fetching Latest Cases ....</Text>
+            </AnimatedLoader>
             <CardView cardElevation={30}
                 cornerRadius={10} style={styles.card}>
                 <Text style={styles.headerText}> Global Cases </Text>
@@ -77,6 +91,10 @@ export default function GlobalCases({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    lottie: {
+        width: 200,
+        height: 200
+    },
     headerText: {
         fontWeight: 'bold',
         textAlign: 'center',

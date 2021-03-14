@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
-
+import { StyleSheet, View, ActivityIndicator, Text } from 'react-native';
 import { Styles } from '../components/style';
 import ErrorBoundary from '../components/ErrorBoundry';
 import colors from '../utils/Colors';
@@ -10,9 +9,16 @@ import CustomTextInput from '../components/CustomTextInput';
 import FullButtonComponent from '../components/FullButtonComponent';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { cos } from 'react-native-reanimated';
+import AwesomeAlert from 'react-native-awesome-alerts';
+import AnimatedLoader from "react-native-animated-loader";
+import { cos, set } from 'react-native-reanimated';
 
 const OTPScreen = function ({ route: { params: { phoneNumber } }, navigation }) {
+  const [showAlert, setshowAlert] = useState(false)
+  const [mess, setMessage] = useState('')
+  const [title, setTitle] = useState('')
+  const [visible, setVisible] = useState(false)
+
   const [otpArray, setOtpArray] = useState(['', '', '', '']);
   const [submittingOtp, setSubmittingOtp] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -35,25 +41,35 @@ const OTPScreen = function ({ route: { params: { phoneNumber } }, navigation }) 
   }, [])
 
   async function signInWithPhoneNumber() {
-   try{
+    try {
+      setVisible(true)
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+      setVisible(false);
       setConfirm(confirmation);
-    }catch(e){
-     console.log(e)
-   }
+    } catch (e) {
+      setVisible(false);
+      navigation.navigate('Telephone');
+      console.log(e)
+    }
   }
 
   async function confirmCode() {
-    try{
-    const code = otpArray.join("");
-    const response = await confirm.confirm(code);
-    if(response){
+    try {
+      setVisible(true)
+      const code = otpArray.join("");
+      setVisible(false)
+      const response = await confirm.confirm(code);
+      if (response) {
         await AsyncStorage.setItem('token', "Logged In")
         navigation.navigate('Main');
-    }
-    } catch(e){
-        console.log(e)
-      
+      }
+    } catch (e) {
+      setshowAlert(true)
+      setTitle('Error In Confirming Code')
+      setMessage('Please Enter the Correct Code')
+      setVisible(false)
+      console.log(e)
+
     }
   }
   const onOtpChange = index => {
@@ -107,6 +123,32 @@ const OTPScreen = function ({ route: { params: { phoneNumber } }, navigation }) 
   return (
     <ErrorBoundary screenName={'OTPScreen'}>
       <View style={styles.container}>
+        <AwesomeAlert
+          show={showAlert}
+          showProgress={false}
+          title={title}
+          message={mess}
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showCancelButton={false}
+          showConfirmButton={true}
+          confirmText="OK"
+          confirmButtonColor="lightblue"
+          confirmButtonStyle={{ marginLeft: 5, width: 100 }}
+          confirmButtonTextStyle={{ fontSize: 16, fontWeight: 'bold', marginLeft: 27 }}
+          onConfirmPressed={() => {
+            setshowAlert(false)
+          }}
+        />
+        <AnimatedLoader
+          visible={visible}
+          overlayColor="rgba(255,255,255,0.75)"
+          source={require("../Assets/loading.json")}
+          animationStyle={styles.lottie}
+          speed={1}
+        >
+          <Text style={styles.headerText}>Loading ...</Text>
+        </AnimatedLoader>
         <CustomText>
           Enter OTP sent to your{' ' + phoneNumber}
         </CustomText>
@@ -159,6 +201,17 @@ const OTPScreen = function ({ route: { params: { phoneNumber } }, navigation }) 
 };
 
 const styles = StyleSheet.create({
+  lottie: {
+    width: 200,
+    height: 200
+  },
+  headerText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 18,
+    marginTop: 45,
+    fontFamily: "Oswald-Bold"
+  },
   container: {
     padding: 16,
     flex: 1,
